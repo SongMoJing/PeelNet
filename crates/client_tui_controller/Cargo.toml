@@ -1,0 +1,13 @@
+[package]
+name = "client_tui_controller"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+directories = "6.0.0"
+config = "0.15.21"
+ratatui = "0.30.0"
+tokio = "1.50.0"
+crossterm = "0.29.0"
+unicode-width = "0.2.2"

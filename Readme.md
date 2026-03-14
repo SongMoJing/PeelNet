@@ -6,11 +6,12 @@
 
 ```
 peel/
-├── crates/   ------------- 模块
-│   ├── core/   ----------- (bin) 核心服务
-│   ├── controllar/   ----- (lib) 控制台服务
-│   ├── net_client/   ----- (lib) 客户端库
-│   ├── net_server/   ----- (lib) 面向客户端的网络服务
-│   └── web_ui/   --------- (lib) WebUI控制台服务
+├── crates/   ------------------------ 模块
+│   ├── server/   ---------------------- (bin) 核心服务
+│   ├── controllar/   ---------------- (lib) 控制台服务
+│   ├── net_client/   ---------------- (lib) 客户端库
+│   ├── net_server/   ---------------- (lib) 面向客户端的网络服务
+│   ├── web_ui/   -------------------- (lib) WebUI控制台服务
+│   └── client_tui_controller/   ------- (bin) 客户端TUI控制台
 └── Cargo.toml
 ```
