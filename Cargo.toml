@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "crates/controller",
+    "crates/core",
+    "crates/net_server",
+    "crates/web_ui"
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["PRC.SongMoJing<Song_MoJing@outlook.com>"]

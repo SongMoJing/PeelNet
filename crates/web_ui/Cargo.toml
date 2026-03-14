@@ -1,0 +1,7 @@
+[package]
+name = "web_ui"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
