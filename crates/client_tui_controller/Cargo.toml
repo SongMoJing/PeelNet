@@ -7,7 +7,8 @@ authors.workspace = true
 [dependencies]
 directories = "6.0.0"
 config = "0.15.21"
-ratatui = "0.30.0"
 tokio = "1.50.0"
 crossterm = "0.29.0"
 unicode-width = "0.2.2"
+cursive = "0.21.1"
+cursive-tabs = "0.8.0"
