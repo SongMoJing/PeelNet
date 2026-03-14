@@ -1,50 +1,64 @@
-use cursive::views::{Button, Dialog, LinearLayout, Panel, SelectView, StackView, TextView};
-use cursive_tabs::TabPanel;
-use cursive::view::Resizable;
+use crate::pages::Page;
 use cursive::align::Align;
-use cursive::CursiveRunnable;
 use cursive::menu::Tree;
 use cursive::traits::Nameable;
-use crate::pages::Page;
+use cursive::view::Resizable;
+use cursive::views::{
+    BoxedView, Button, Dialog, LinearLayout, Panel, SelectView, StackView, TextView,
+};
+use cursive::CursiveRunnable;
+use cursive_tabs::TabPanel;
 
-pub struct IndexPage {
-}
+pub struct IndexPage {}
 
 impl IndexPage {
-	pub fn new() -> IndexPage {
-		IndexPage {}
-	}
+    pub fn new() -> IndexPage {
+        IndexPage {}
+    }
 }
 
 impl Page for IndexPage {
-	fn render(&mut self, siv: &mut CursiveRunnable) {
-		// 1. 定义菜单树结构 (这是最标准、最 IDE 的实现方式)
-		let mut menu = siv.menubar();
-		menu.add_subtree("文件(F)", Tree::new()
-			.leaf("新建", |s| { /* 执行新建逻辑 */ })
-			.leaf("打开", |s| { /* 执行打开逻辑 */ })
-			.delimiter()
-			.leaf("退出", |s| s.quit()));
-
-		// 2. 标签栏 (紧贴菜单栏下方)
-		let mut tab_bar = LinearLayout::horizontal();
-		tab_bar.add_child(TextView::new(" [main.rs] "));
-		tab_bar.add_child(TextView::new(" [index.rs] "));
-
-		// 3. 内容区
-		let content = Panel::new(TextView::new("编辑器内容区域").with_name("editor"));
-
-		// 4. 总布局
-		let layout = LinearLayout::vertical()
-			.child(Panel::new(tab_bar))
-			.child(content.full_screen());
-
-		siv.add_layer(layout);
-
-		// 5. 必须开启菜单栏显示
-		siv.set_autohide_menu(false);
-		siv.select_menubar();
-	}
+    fn render(&mut self, siv: &mut CursiveRunnable) {
+        let menu = siv.menubar();
+        menu.add_subtree(
+            "Peel",
+            Tree::new()
+                .leaf("密钥配置", |s| {})
+                .leaf("软件设置", |s| {})
+                .leaf("服务器配置", |s| {})
+                .delimiter()
+                .leaf("断开连接并退出", |s| s.quit()),
+        );
+        menu.add_subtree(
+            "帮助",
+            Tree::new()
+                .leaf("关于", |s| {})
+                .leaf("使用帮助", |s| {})
+                .leaf("反馈", |s| {}),
+        );
+        let filler = "░".repeat(80);
+        let head_list = vec!["░█▀█░█▀▀░█▀▀░█░░", "░█▀▀░█▀▀░█▀▀░█░░", "░▀░░░▀▀▀░▀▀▀░▀▀▀"];
+        let mut header = LinearLayout::vertical();
+        for line in head_list {
+            header = header.child(
+                LinearLayout::horizontal()
+                    .child(TextView::new(filler.clone()).full_width())
+                    .child(TextView::new(line).center())
+                    .child(TextView::new(filler.clone()).full_width()),
+            );
+        }
+        let panel = Panel::new(TextView::new("当前无连接"));
+        let content = LinearLayout::vertical()
+            .child(header)
+            .child(panel.full_screen());
+        let monitor = LinearLayout::horizontal()
+            .child(TextView::new("127.0.0.1:8080"))
+            .child(TextView::new("运行中"));
+        let layout = LinearLayout::vertical()
+            .child(content.full_screen())
+            .child(monitor);
+        siv.add_layer(layout);
+        siv.set_autohide_menu(false);
+        // siv.select_menubar();
+    }
 }
-
-

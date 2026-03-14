@@ -1,4 +1,5 @@
 mod pages;
+mod status;
 
 use cursive::view::Resizable;
 use cursive::style::{Color, PaletteColor};
