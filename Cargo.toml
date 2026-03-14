@@ -1,7 +1,8 @@
 [workspace]
 members = [
+    "crates/server",
     "crates/controller",
-    "crates/core",
+    "crates/net_client",
     "crates/net_server",
     "crates/web_ui"
 ]
