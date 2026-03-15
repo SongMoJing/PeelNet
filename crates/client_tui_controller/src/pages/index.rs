@@ -1,13 +1,11 @@
+use crate::model::config::Config;
+use crate::model::saved::Saved;
+use crate::model::state::State;
 use crate::pages::Page;
-use cursive::align::Align;
-use cursive::menu::Tree;
-use cursive::traits::Nameable;
+use cursive::style::{Color, ColorStyle, PaletteColor};
 use cursive::view::Resizable;
-use cursive::views::{
-    BoxedView, Button, Dialog, LinearLayout, Panel, SelectView, StackView, TextView,
-};
-use cursive::CursiveRunnable;
-use cursive_tabs::TabPanel;
+use cursive::views::{LinearLayout, Panel, ScrollView, TextView};
+use std::rc::Rc;
 
 pub struct IndexPage {}
 
@@ -18,47 +16,43 @@ impl IndexPage {
 }
 
 impl Page for IndexPage {
-    fn render(&mut self, siv: &mut CursiveRunnable) {
-        let menu = siv.menubar();
-        menu.add_subtree(
-            "Peel",
-            Tree::new()
-                .leaf("密钥配置", |s| {})
-                .leaf("软件设置", |s| {})
-                .leaf("服务器配置", |s| {})
-                .delimiter()
-                .leaf("断开连接并退出", |s| s.quit()),
-        );
-        menu.add_subtree(
-            "帮助",
-            Tree::new()
-                .leaf("关于", |s| {})
-                .leaf("使用帮助", |s| {})
-                .leaf("反馈", |s| {}),
-        );
-        let filler = "░".repeat(80);
-        let head_list = vec!["░█▀█░█▀▀░█▀▀░█░░", "░█▀▀░█▀▀░█▀▀░█░░", "░▀░░░▀▀▀░▀▀▀░▀▀▀"];
-        let mut header = LinearLayout::vertical();
-        for line in head_list {
-            header = header.child(
-                LinearLayout::horizontal()
-                    .child(TextView::new(filler.clone()).full_width())
-                    .child(TextView::new(line).center())
-                    .child(TextView::new(filler.clone()).full_width()),
-            );
+    fn render(&mut self, config: Rc<Config>, state: Rc<State>, saved: Rc<Saved>) -> LinearLayout {
+        let header = TextView::new(format!(
+            "{}\n{}\n{}\n{}\n{}",
+            r#"________          ______                     __ "#,
+            r#"___  __ \____________  /        _____  ___ _/ /_"#,
+            r#"__  /_/ /  _ \  _ \_  /        \  __ \/ _ \  __/"#,
+            r#"_  ____//  __/  __/  /___  __  / / / /  __/ /_  "#,
+            r#"/_/     \___/\___//_____/ /_/ /_/ /_/\___/\__/  "#
+        ))
+        .style(ColorStyle::new(
+            PaletteColor::HighlightText,
+            Color::TerminalDefault,
+        ))
+        .center();
+        let mut connected_list = LinearLayout::vertical();
+        for item in saved.list_connect_info() {
+            connected_list.add_child(TextView::new(item.name));
         }
-        let panel = Panel::new(TextView::new("当前无连接"));
+        let content = Panel::new(
+            LinearLayout::vertical()
+                .child(TextView::new("上次链接").center().full_width())
+                .child(
+                    Panel::new(LinearLayout::vertical().child(ScrollView::new(connected_list)))
+                        .title("已连接")
+                        .min_width(50)
+                        .min_width(8)
+                        .max_height(12)
+                        .max_width(50),
+                ),
+        );
         let content = LinearLayout::vertical()
             .child(header)
-            .child(panel.full_screen());
-        let monitor = LinearLayout::horizontal()
-            .child(TextView::new("127.0.0.1:8080"))
-            .child(TextView::new("运行中"));
+            .child(content.full_screen());
+        let monitor = LinearLayout::horizontal().child(TextView::new("未连接"));
         let layout = LinearLayout::vertical()
             .child(content.full_screen())
             .child(monitor);
-        siv.add_layer(layout);
-        siv.set_autohide_menu(false);
-        // siv.select_menubar();
+        layout
     }
 }
