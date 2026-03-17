@@ -38,9 +38,16 @@ impl Saved {
 
 #[derive(Clone)]
 pub struct ConnectInfo {
+	/// 连接名称（备注）
 	pub name: String,
+	/// 目标主机
 	pub host: String,
+	/// 端口
 	pub port: u16,
+	/// 用户名
+	pub user: String,
+	/// 证书
 	pub cert: String,
-	pub key: String,
+	/// 证书密码（可选）
+	pub key: Option<String>,
 }
