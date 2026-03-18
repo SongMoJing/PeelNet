@@ -12,6 +12,7 @@ peel/
 │   ├── net_client/   ---------------- (lib) 客户端库
 │   ├── net_server/   ---------------- (lib) 面向客户端的网络服务
 │   ├── web_ui/   -------------------- (lib) WebUI控制台服务
+│   ├── models/   -------------------- (lib) 数据模型
 │   └── client_tui_controller/   ------- (bin) 客户端TUI控制台
 └── Cargo.toml
 ```

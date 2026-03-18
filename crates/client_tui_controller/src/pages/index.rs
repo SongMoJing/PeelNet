@@ -2,10 +2,8 @@ use crate::model::config::Config;
 use crate::model::saved::{ConnectInfo, Saved};
 use crate::model::state::State;
 use crate::pages::Page;
-use cursive::style::{Color, ColorStyle, PaletteColor};
 use cursive::view::{Nameable, Resizable};
 use cursive::views::*;
-use cursive::View;
 use std::rc::Rc;
 use unicode_width::UnicodeWidthStr;
 

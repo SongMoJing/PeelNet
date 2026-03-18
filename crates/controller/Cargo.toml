@@ -5,3 +5,6 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+global = { path = "../global" }
+
+rust-i18n = "3"

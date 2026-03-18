@@ -5,12 +5,13 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-unicode-width = "0.2.2"
+global = { path = "../global" }
+controller = { path = "../controller" }
+web_ui = { path = "../web_ui" }
+
 directories = "6.0.0"
 rust-i18n = "3"
 lazy_static = "1.5.0"
-colored = "3.1.1"
-chrono = "0.4.43"
 tokio = { version = "1.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "1.0.7+spec-1.1.0"

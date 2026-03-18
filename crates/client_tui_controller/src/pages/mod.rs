@@ -1,4 +1,3 @@
-use cursive::View;
 use cursive::views::LinearLayout;
 
 pub mod index;

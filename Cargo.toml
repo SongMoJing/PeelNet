@@ -5,7 +5,8 @@ members = [
     "crates/net_client",
     "crates/net_server",
     "crates/web_ui",
-    "crates/client_tui_controller"
+    "crates/client_tui_controller",
+    "crates/global"
 ]
 resolver = "2"
 

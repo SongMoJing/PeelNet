@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate rust_i18n;
 
-use std::io::ErrorKind;
-use crate::io::Log;
 use directories::BaseDirs;
+use global::config::Config;
+use global::io::Log;
 use lazy_static::lazy_static;
+use std::io::ErrorKind;
 use std::path::PathBuf;
+use std::process::exit;
 use std::sync::OnceLock;
-use crate::model_config::Config;
 
-mod io;
 mod model_config;
 
 i18n!("locales", fallback = "zh-CN");
@@ -23,7 +23,7 @@ lazy_static! {
         base.config_dir().join("peel_net").join("server").join("server.toml")
     ).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
-        std::process::exit(1);
+        exit(1);
     });
     static ref PATH_DIR_LOG: PathBuf = BaseDirs::new().map(|base| {
         // Windows: ~\AppData\Local\peel_net\logs
@@ -32,7 +32,7 @@ lazy_static! {
         base.data_local_dir().join("peel_net").join("server").join("logs")
     }).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
-        std::process::exit(1);
+        exit(1);
     });
 }
 
@@ -43,6 +43,17 @@ async fn main() {
     rust_i18n::set_locale(&std::env::var("LANG").unwrap_or_else(|_| "zh-CN".to_string()));
     check_config();
     print_hello();
+    if let Some(config) = CONFIG.get() {
+        if let Some(net_controller) = &config.server.network_controller {
+            controller::start_net_controller_service(net_controller);
+        }
+        if let Some(web_ui) = &config.server.web_ui {
+            web_ui::start_web_ui_service(web_ui);
+        }
+    } else {
+        Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();
+        exit(1);
+    }
 }
 
 fn check_config() {
@@ -50,20 +61,34 @@ fn check_config() {
         Ok(config) => {
             CONFIG.set(config).unwrap_or_else(|_| {
                 Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();
-                std::process::exit(1);
+                exit(1);
             });
             Log::i(t!("tag.read_config"), t!("info.config_load_success")).print();
         }
         Err(err) => {
             match err.kind() {
                 ErrorKind::NotFound => {
-                    Log::e(t!("tag.read_config"), t!("error.not_found", ath = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None"))).print();
+                    Log::e(
+                        t!("tag.read_config"),
+                        t!(
+                            "error.not_found",
+                            ath = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None")
+                        ),
+                    )
+                    .print();
                 }
                 ErrorKind::PermissionDenied => {
                     Log::e(t!("tag.read_config"), t!("error.permission_denied")).print();
                 }
                 ErrorKind::InvalidData => {
-                    Log::e(t!("tag.read_config"), t!("error.invalid_data", path = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None"))).print();
+                    Log::e(
+                        t!("tag.read_config"),
+                        t!(
+                            "error.invalid_data",
+                            path = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None")
+                        ),
+                    )
+                    .print();
                     Log::i(t!("tag.read_config"), err.to_string()).print();
                 }
                 e => {
@@ -71,7 +96,7 @@ fn check_config() {
                     Log::e(t!("tag.read_config"), t!("error.unexpected_error")).print();
                 }
             }
-            std::process::exit(1);
+            exit(1);
         }
     }
 }
@@ -91,8 +116,13 @@ fn print_hello() {
 ██╔═══╝ ██╔══╝  ██╔══╝  ██║         ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗
 ██║     ███████╗███████╗███████╗    ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║
 ╚═╝     ╚══════╝╚══════╝╚══════╝    ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝
-"#.trim();
-    Log::i(t!("tag.version"), format!("Peel Server v{}", (&VERTION).to_string())).print();
+"#
+    .trim();
+    Log::i(
+        t!("tag.version"),
+        format!("Peel Server v{}", (&VERTION).to_string()),
+    )
+    .print();
     Log::i(t!("tag.author"), t!("info.author")).print();
     Log::i(t!("tag.welcome"), peel_server).print();
 }
