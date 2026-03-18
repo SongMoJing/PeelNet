@@ -50,31 +50,33 @@ fn check_config() {
         Ok(config) => {
             CONFIG.set(config).unwrap_or_else(|_| {
                 Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();
+                std::process::exit(1);
             });
             Log::i(t!("tag.read_config"), t!("info.config_load_success")).print();
         }
         Err(err) => {
             match err.kind() {
+                ErrorKind::NotFound => {
+                    Log::e(t!("tag.read_config"), t!("error.not_found", ath = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None"))).print();
+                }
                 ErrorKind::PermissionDenied => {
                     Log::e(t!("tag.read_config"), t!("error.permission_denied")).print();
-                    std::process::exit(1);
                 }
                 ErrorKind::InvalidData => {
                     Log::e(t!("tag.read_config"), t!("error.invalid_data", path = PATH_FILE_CONFIG.as_path().to_str().unwrap_or("None"))).print();
-                    std::process::exit(1);
+                    Log::i(t!("tag.read_config"), err.to_string()).print();
                 }
                 e => {
                     println!("{:?}", e);
                     Log::e(t!("tag.read_config"), t!("error.unexpected_error")).print();
-                    std::process::exit(1);
                 }
             }
+            std::process::exit(1);
         }
     }
 }
 
 fn print_hello() {
-    let tag = "Welcome to Peel Server";
     let peel_server = r#"
 ██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗    ████████╗ ██████╗
 ██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝    ╚══██╔══╝██╔═══██╗
@@ -90,7 +92,7 @@ fn print_hello() {
 ██║     ███████╗███████╗███████╗    ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║
 ╚═╝     ╚══════╝╚══════╝╚══════╝    ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝
 "#.trim();
-    Log::i("version", format!("Peel Server v{}", (&VERTION).to_string())).print();
-    Log::i("author", t!("info.author")).print();
-    Log::i(tag, peel_server).print();
+    Log::i(t!("tag.version"), format!("Peel Server v{}", (&VERTION).to_string())).print();
+    Log::i(t!("tag.author"), t!("info.author")).print();
+    Log::i(t!("tag.welcome"), peel_server).print();
 }

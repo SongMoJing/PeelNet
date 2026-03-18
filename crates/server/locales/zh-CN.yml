@@ -6,6 +6,11 @@ error:
     unexpected_error: "意外错误"
     invalid_data: "无效数据，path=%{path}"
     permission_denied: "权限被拒绝"
+    not_found: "未找到 %{path}"
+    feature_not_enabled: "功能 [%{feature}] 已开启，但没有相应配置"
 tag:
+    author: "作者"
+    version: "版本"
+    welcome: "欢迎语"
     read_config: "读取配置文件"
 

@@ -9,6 +9,8 @@ port = 9771
 addr = [
     "0.0.0.0"
 ]
+
+[server.wui.ca]
 # 根证书
 cert_ca = "/path/to/rootCA.crt"
 # 服务端证书
