@@ -25,7 +25,7 @@ pub(crate) struct ServerFeatureConfig {
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct WuiConfig {
     pub(crate) port: u16,
-    pub(crate) addr: Vec<String>,
+    pub(crate) addr: String,
     pub(crate) ca: CAConfig,
 }
 
@@ -33,7 +33,7 @@ pub(crate) struct WuiConfig {
 pub(crate) struct TuiConfig {
     feature: TuiFeatureConfig,
     pub(crate) port: u16,
-    pub(crate) addr: Vec<String>,
+    pub(crate) addr: String,
     pub(crate) ca: Option<CAConfig>,
     pub(crate) authorized_keys: Option<AuthorizedKeysConfig>,
 }

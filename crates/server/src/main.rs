@@ -44,6 +44,7 @@ async fn main() {
     check_config();
     print_hello();
     if let Some(config) = CONFIG.get() {
+        controller::start_controller_service(config);
         if let Some(net_controller) = &config.server.network_controller {
             controller::start_net_controller_service(net_controller);
         }

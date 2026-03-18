@@ -14,14 +14,14 @@ pub struct ServerConfig {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WebUIConfig {
 	pub port: u16,
-	pub addr: Vec<String>,
+	pub addr: String,
 	pub ca: CAConfig,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NetworkControllerConfig {
 	pub port: u16,
-	pub addr: Vec<String>,
+	pub addr: String,
 	pub ca: Option<CAConfig>,
 	pub authorized_keys: Option<AuthorizedKeysConfig>,
 }
