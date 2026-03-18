@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>集群面板 - PeeLServer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            border-collapse: collapse;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 15px 20px;
+            text-align: left;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 15px 20px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            background-image: linear-gradient(var(--accent-red), var(--accent-red)),
+            linear-gradient(var(--accent-blue), var(--accent-blue)),
+            linear-gradient(var(--accent-green), var(--accent-green));
+            background-repeat: no-repeat;
+            background-size: calc((100% - 80px) * 1000000) 100%, calc((100% - 30px) * 1000000) 100%, 100% 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <main class="main-content">
+        <h2 style="color: var(--dark-green)">集群状态监控</h2>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>节点名称</th>
+                <th>IP地址</th>
+                <th>CPU占用</th>
+                <th>在线时长</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Node-Alpha-01</td>
+                <td>192.168.1.10</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%;"></div>
+                    </div>
+                </td>
+                <td>12d 4h</td>
+            </tr>
+            <tr>
+                <td>Node-Alpha-01</td>
+                <td>192.168.1.10</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 89%;"></div>
+                    </div>
+                </td>
+                <td>12d 4h</td>
+            </tr>
+            <tr>
+                <td>Node-Alpha-01</td>
+                <td>192.168.1.10</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 12%;"></div>
+                    </div>
+                </td>
+                <td>12d 4h</td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+</body>
+</html>

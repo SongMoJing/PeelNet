@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主控面板 - PeeLServer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 主控中心布局 */
+        .main-content {
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 控制卡片 */
+        .control-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #edf2f7;
+            transition: all 0.3s ease;
+        }
+
+        .control-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-info strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--dark-green);
+            margin-bottom: 4px;
+        }
+
+        .card-info small {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Switch 开关 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 28px;
+        }
+
+        input {
+            box-sizing: border-box;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 28px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+
+        /* 模态框 - 大屏端 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: white;
+            width: 600px;
+            border-radius: 20px;
+            /*display: flex;*/
+            padding: 4px 32px 32px 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 模态框标题 */
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-green);
+            margin: 24px 0 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #ea5269;
+            color: #f4f4f4;
+        }
+
+        /* 搜索和新增按钮区域 */
+        .search-add-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        /* 搜索框 */
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 70px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 正则开关 */
+        .regex-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .regex-badge {
+            padding: 4px 10px;
+            background: #e2e8f0;
+            color: #64748b;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #reToggle:checked + .regex-badge {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* 新增按钮 */
+        .add-button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-button:hover {
+            background: #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 权限过滤 */
+        .filter-container {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748b;
+            margin-right: 12px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 账号列表 */
+        .account-list {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            height: 50vh;
+            scrollbar-width: none;
+            overflow: auto;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .list-body {
+            box-sizing: border-box;
+            scrollbar-width: none;
+            overflow: auto;
+        }
+
+        .account-item {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .account-item:hover {
+            background: #f8fafc;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+        .account-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .account-details {
+            flex: 1;
+        }
+
+        .account-name {
+            font-weight: bold;
+            color: var(--dark-green);
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .account-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .meta-item {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .permissions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .permission-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            color: var(--accent-blue);
+        }
+
+        .edit-btn:hover {
+            background: #eff6ff;
+            border-color: var(--accent-blue);
+        }
+
+        .delete-btn {
+            color: var(--accent-red);
+            border-color: #fecaca;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+            border-color: var(--accent-red);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* 表单样式 */
+        .form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .form-content {
+            background: white;
+            width: 480px;
+            border-radius: 16px;
+            padding: 4px 32px 32px 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 权限网格 */
+        .permission-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .permission-item label {
+            margin: 0;
+            font-size: 14px;
+            font-weight: normal;
+            color: #64748b;
+        }
+
+        /* 表单操作按钮 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #15803d;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .modal-overlay {
+                background: white !important;
+                backdrop-filter: none !important;
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw !important;
+                height: 100% !important;
+                z-index: 9999;
+                overflow: auto;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .modal-content {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                padding: 20px; !important;
+                box-sizing: border-box;
+                box-shadow: none !important;
+                animation: none !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-overlay {
+                background: white !important;
+                backdrop-filter: none !important;
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw !important;
+                height: 100vh !important;
+                z-index: 9999;
+                overflow: visible;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .form-content {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                padding: 20px;
+                box-sizing: border-box;
+                box-shadow: none !important;
+                animation: none !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .list-body {
+                flex: 1;
+                overflow: auto;
+            }
+
+            .account-list {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                scrollbar-width: none;
+                overflow: auto;
+            }
+        }
+
+        /* 遮罩层动画 */
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes overlayFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* 内容窗口动画：缩放 + 位移 */
+        @keyframes modalScaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes modalScaleOut {
+            from {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95) translateY(30px);
+            }
+        }
+
+        /* 动态类：用于通过 JS 控制退场 */
+        .modal-overlay.closing, .form-overlay.closing {
+            animation: overlayFadeOut 0.3s ease forwards;
+        }
+
+        .modal-overlay.closing .modal-content,
+        .form-overlay.closing .form-content {
+            animation: modalScaleOut 0.3s ease forwards;
+        }
+
+        /* 修改现有样式，应用入场动画 */
+        .modal-overlay, .form-overlay {
+            animation: overlayFadeIn 0.3s ease;
+        }
+
+        .modal-content, .form-content {
+            animation: modalScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 带有弹性效果 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <main class="main-content">
+        <h1 style="color: var(--dark-green); margin-bottom: 40px; text-align: center;">PeeLServer 主控中心</h1>
+
+        <!-- 流量转发控制 -->
+        <div class="control-card" id="trafficControl" style="cursor: pointer;">
+            <div class="card-info">
+                <strong>流量转发引擎</strong>
+                <small>管理全局边缘节点流量处理状态</small>
+            </div>
+            <label class="switch">
+                <input type="checkbox" disabled id="trafficSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- 账号管理 -->
+        <div class="control-card" id="accountManagement" style="cursor: pointer;">
+            <div class="card-info">
+                <strong>账号权限管理</strong>
+                <small>配置本地及集群同步用户列表</small>
+            </div>
+        </div>
+
+        <!-- 退出登录 -->
+        <div class="control-card" id="logout" style="cursor: pointer;">
+            <div class="card-info">
+                <strong style="color: var(--accent-red);">安全退出登录</strong>
+                <small>清除会话并返回登录页面</small>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 账号管理模态框 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <div class="modal-title">
+            <span>账号资源列表</span>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+
+        <!-- 搜索和新增按钮 -->
+        <div class="search-add-container">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="输入账号名或用户组搜索...">
+                <div class="regex-toggle">
+                    <input type="checkbox" id="reToggle" style="display: none;">
+                    <label for="reToggle" class="regex-badge">RE</label>
+                </div>
+            </div>
+            <button class="add-button" onclick="openAddForm()">+ 新增账号</button>
+        </div>
+
+        <!-- 权限过滤 -->
+        <div class="filter-container">
+            <label class="filter-label" for="permissionFilter">权限过滤:</label>
+            <select id="permissionFilter" class="filter-select" onchange="filterAccounts()">
+                <option value="all">全部权限</option>
+                <option value="create">创建</option>
+                <option value="read">读取</option>
+                <option value="update">更新</option>
+                <option value="delete">删除</option>
+            </select>
+        </div>
+
+        <!-- 账号列表 -->
+        <div class="account-list">
+            <div class="list-body" id="accountList">
+                <!-- 账号项将通过 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增账号表单 -->
+<div class="form-overlay" id="formOverlay">
+    <div class="form-content">
+        <div class="modal-title">
+            <span>新增账号</span>
+            <button class="close-btn" onclick="closeAddForm()">×</button>
+        </div>
+
+        <form id="accountForm">
+            <div class="form-group">
+                <label for="accountType">账号类型</label>
+                <select id="accountType" class="form-control" onchange="toggleAccountFields()">
+                    <option value="local">本地账号</option>
+                    <option value="cluster">集群账号</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="accountName">账号名</label>
+                <input type="text" id="accountName" class="form-control" placeholder="请输入账号名">
+            </div>
+
+            <div class="form-group">
+                <label>账号权限</label>
+                <div class="permission-grid">
+                    <div class="permission-item">
+                        <input type="checkbox" id="permCreate">
+                        <label for="permCreate">创建</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="permRead">
+                        <label for="permRead">读取</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="permUpdate">
+                        <label for="permUpdate">更新</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="permDelete">
+                        <label for="permDelete">删除</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="userGroupField" style="display: none;">
+                <label for="userGroup">用户组</label>
+                <input type="text" id="userGroup" class="form-control" placeholder="请输入用户组">
+            </div>
+
+            <div class="form-group">
+                <label for="accountPassword">账号密码</label>
+                <input type="password" id="accountPassword" class="form-control" placeholder="请输入密码">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeAddForm()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveAccount()">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 添加点击监听
+        document.getElementById('trafficControl').addEventListener('click', function () {
+            toggleTraffic(!document.getElementById('trafficSwitch').checked);
+        });
+        document.getElementById('accountManagement').addEventListener('click', function () {
+            openModal();
+        });
+        document.getElementById('logout').addEventListener('click', logout);
+    });
+
+    // 流量转发状态管理
+    function toggleTraffic(enabled) {
+        localStorage.setItem('trafficEnabled', enabled);
+        document.getElementById('trafficSwitch').checked = enabled;
+        console.log('流量转发已' + (enabled ? '启用' : '禁用'));
+    }
+
+    // 退出登录
+    function logout() {
+        localStorage.clear();
+    }
+
+    // 账号数据管理
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
+    // 初始化
+    function init() {
+        // 加载流量转发状态
+        document.getElementById('trafficSwitch').checked = localStorage.getItem('trafficEnabled') === 'true';
+        // 添加默认账号
+        if (accounts.length === 0) {
+            accounts.push({
+                id: 1,
+                name: 'admin1',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 2,
+                name: 'admin2',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 3,
+                name: 'admin3',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 4,
+                name: 'admin4',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 5,
+                name: 'admin5',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 6,
+                name: 'admin6',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 7,
+                name: 'admin7',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            accounts.push({
+                id: 8,
+                name: 'admin8',
+                type: 'local',
+                permissions: ['create', 'read', 'update', 'delete'],
+                password: 'admin123'
+            });
+            saveAccounts();
+        }
+    }
+
+    // 保存账号数据
+    function saveAccounts() {
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+        renderAccounts();
+    }
+
+    // 渲染账号列表
+    function renderAccounts() {
+        const accountList = document.getElementById('accountList');
+
+        if (accounts.length === 0) {
+            accountList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">暂无账号数据</div>
+                </div>
+            `;
+            return;
+        }
+
+        accountList.innerHTML = accounts.map(account => {
+            const permissionsHtml = account.permissions.map(perm => {
+                const permMap = {
+                    create: {class: 'perm-create', text: '创建'},
+                    read: {class: 'perm-read', text: '读取'},
+                    update: {class: 'perm-update', text: '更新'},
+                    delete: {class: 'perm-delete', text: '删除'}
+                };
+                const p = permMap[perm];
+                return p ? `<span class="permission-badge ${p.class}">${p.text}</span>` : '';
+            }).join('');
+
+            return `
+                <div class="account-item">
+                    <div class="account-info">
+                        <div class="account-details">
+                            <div class="account-name">${account.name}</div>
+                            <div class="account-meta">
+                                <span class="meta-item">类型: ${account.type === 'local' ? '本地' : '集群'}</span>
+                                ${account.userGroup ? `<span class="meta-item">用户组: ${account.userGroup}</span>` : ''}
+                            </div>
+                            <div class="permissions">
+                                ${permissionsHtml}
+                            </div>
+                        </div>
+                        <div class="account-actions">
+                            <button class="action-btn edit-btn" onclick="editAccount(${account.id})">编辑</button>
+                            <button class="action-btn delete-btn" onclick="deleteAccount(${account.id})">删除</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 搜索账号
+    let searchTimer;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            filterAccounts();
+        }, 500);
+    });
+
+    // 过滤账号
+    function filterAccounts() {
+        const searchVal = document.getElementById('searchInput').value;
+        const isRegex = document.getElementById('reToggle').checked;
+        const permissionFilter = document.getElementById('permissionFilter').value;
+
+        const filteredAccounts = accounts.filter(account => {
+            // 搜索过滤
+            let searchMatch = true;
+            if (searchVal) {
+                const fields = [account.name];
+                if (account.userGroup) fields.push(account.userGroup);
+
+                if (isRegex) {
+                    try {
+                        const regex = new RegExp(searchVal, 'i');
+                        searchMatch = fields.some(field => regex.test(field));
+                    } catch {
+                        searchMatch = false;
+                    }
+                } else {
+                    const lowerVal = searchVal.toLowerCase();
+                    searchMatch = fields.some(field => field.toLowerCase().includes(lowerVal));
+                }
+            }
+
+            // 权限过滤
+            let permissionMatch = true;
+            if (permissionFilter !== 'all') {
+                permissionMatch = account.permissions.includes(permissionFilter);
+            }
+
+            return searchMatch && permissionMatch;
+        });
+
+        const accountList = document.getElementById('accountList');
+
+        if (filteredAccounts.length === 0) {
+            accountList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">没有找到匹配的账号</div>
+                </div>
+            `;
+            return;
+        }
+
+        accountList.innerHTML = filteredAccounts.map(account => {
+            const permissionsHtml = account.permissions.map(perm => {
+                const permMap = {
+                    create: {class: 'perm-create', text: '创建'},
+                    read: {class: 'perm-read', text: '读取'},
+                    update: {class: 'perm-update', text: '更新'},
+                    delete: {class: 'perm-delete', text: '删除'}
+                };
+                const p = permMap[perm];
+                return p ? `<span class="permission-badge ${p.class}">${p.text}</span>` : '';
+            }).join('');
+
+            return `
+                <div class="account-item">
+                    <div class="account-info">
+                        <div class="account-details">
+                            <div class="account-name">${account.name}</div>
+                            <div class="account-meta">
+                                <span class="meta-item">类型: ${account.type === 'local' ? '本地' : '集群'}</span>
+                                ${account.userGroup ? `<span class="meta-item">用户组: ${account.userGroup}</span>` : ''}
+                            </div>
+                            <div class="permissions">
+                                ${permissionsHtml}
+                            </div>
+                        </div>
+                        <div class="account-actions">
+                            <button class="action-btn edit-btn" onclick="editAccount(${account.id})">编辑</button>
+                            <button class="action-btn delete-btn" onclick="deleteAccount(${account.id})">删除</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 模态框管理
+    function openModal() {
+        const modal = document.getElementById('modalOverlay');
+        modal.style.display = 'flex';
+        renderAccounts();
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('modalOverlay');
+        modal.classList.add('closing');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.classList.remove('closing');
+        }, 290);
+    }
+
+    // 新增账号表单
+    function openAddForm() {
+        const form = document.getElementById('formOverlay');
+        form.style.display = 'flex';
+
+        // 重置表单
+        document.getElementById('accountType').value = 'local';
+        document.getElementById('accountName').value = '';
+        document.getElementById('permCreate').checked = false;
+        document.getElementById('permRead').checked = false;
+        document.getElementById('permUpdate').checked = false;
+        document.getElementById('permDelete').checked = false;
+        document.getElementById('userGroup').value = '';
+        document.getElementById('accountPassword').value = '';
+        toggleAccountFields();
+    }
+
+    function closeAddForm() {
+        const form = document.getElementById('formOverlay');
+        form.classList.add('closing');
+        setTimeout(() => {
+            form.style.display = 'none';
+            form.classList.remove('closing');
+        }, 290);
+    }
+
+    function toggleAccountFields() {
+        const type = document.getElementById('accountType').value;
+        const userGroupField = document.getElementById('userGroupField');
+        userGroupField.style.display = type === 'cluster' ? 'block' : 'none';
+    }
+
+    function saveAccount() {
+        const type = document.getElementById('accountType').value;
+        const name = document.getElementById('accountName').value;
+        const password = document.getElementById('accountPassword').value;
+
+        if (!name || !password) {
+            alert('请填写账号名和密码');
+            return;
+        }
+
+        // 收集权限
+        const permissions = [];
+        if (document.getElementById('permCreate').checked) permissions.push('create');
+        if (document.getElementById('permRead').checked) permissions.push('read');
+        if (document.getElementById('permUpdate').checked) permissions.push('update');
+        if (document.getElementById('permDelete').checked) permissions.push('delete');
+
+        // 创建账号对象
+        const newAccount = {
+            id: Date.now(),
+            name: name,
+            type: type,
+            permissions: permissions,
+            password: password
+        };
+
+        // 添加用户组
+        if (type === 'cluster') {
+            newAccount.userGroup = document.getElementById('userGroup').value || '';
+        }
+
+        // 保存账号
+        accounts.push(newAccount);
+        saveAccounts();
+        closeAddForm();
+    }
+
+    function deleteAccount(id) {
+        if (confirm('确定要删除该账号吗？')) {
+            accounts = accounts.filter(account => account.id !== id);
+            saveAccounts();
+        }
+    }
+
+    function editAccount(id) {
+        const account = accounts.find(a => a.id === id);
+        if (!account) return;
+
+        // 打开表单
+        openAddForm();
+
+        // 填充表单数据
+        document.getElementById('accountType').value = account.type;
+        document.getElementById('accountName').value = account.name;
+        document.getElementById('permCreate').checked = account.permissions.includes('create');
+        document.getElementById('permRead').checked = account.permissions.includes('read');
+        document.getElementById('permUpdate').checked = account.permissions.includes('update');
+        document.getElementById('permDelete').checked = account.permissions.includes('delete');
+        document.getElementById('userGroup').value = account.userGroup || '';
+        document.getElementById('accountPassword').value = account.password;
+        toggleAccountFields();
+
+        // 替换保存函数
+        const originalSave = window.saveAccount;
+        window.saveAccount = function () {
+            const type = document.getElementById('accountType').value;
+            const name = document.getElementById('accountName').value;
+            const password = document.getElementById('accountPassword').value;
+
+            if (!name || !password) {
+                alert('请填写账号名和密码');
+                return;
+            }
+
+            // 收集权限
+            const permissions = [];
+            if (document.getElementById('permCreate').checked) permissions.push('create');
+            if (document.getElementById('permRead').checked) permissions.push('read');
+            if (document.getElementById('permUpdate').checked) permissions.push('update');
+            if (document.getElementById('permDelete').checked) permissions.push('delete');
+
+            // 更新账号
+            const index = accounts.findIndex(a => a.id === id);
+            accounts[index] = {
+                ...account,
+                name: name,
+                type: type,
+                permissions: permissions,
+                password: password,
+                userGroup: type === 'cluster' ? document.getElementById('userGroup').value || '' : undefined
+            };
+
+            saveAccounts();
+            closeAddForm();
+            window.saveAccount = originalSave;
+        };
+    }
+
+    // 初始化
+    init();
+</script>
+</body>
+</html>

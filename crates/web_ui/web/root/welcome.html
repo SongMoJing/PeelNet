@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎使用 - PeeLServer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .welcome-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .page-header h2 {
+            color: var(--dark-green);
+            margin: 0 0 20px 0;
+            font-size: 1.4rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.2s ease;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 65%;
+            max-width: 200px;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .ring-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 10;
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .chart-label {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .info-section {
+            background: white;
+            padding: 6px 25px;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .info-title {
+            color: #000000;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .info-content {
+            color: #64748b;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .ip-hidden .masked {
+            color: #94a3b8;
+        }
+
+        .ip-hidden .real-ip {
+            display: none;
+        }
+
+        .ip-hidden:hover .masked {
+            display: none;
+        }
+
+        .ip-hidden:hover .real-ip {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+<main class="welcome-container">
+    <header class="page-header">
+        <h2>节点实时监控</h2>
+    </header>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="progress-ring">
+                <svg viewBox="0 0 100 100">
+                    <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                    <circle id="cpuRing" class="ring-fill" cx="50" cy="50" r="42"
+                            style="stroke: var(--accent-blue);stroke-dashoffset: 0"></circle>
+                </svg>
+                <div class="percentage" id="cpuText">0%</div>
+            </div>
+            <div class="chart-label">CPU 占用</div>
+        </div>
+
+        <div class="chart-card">
+            <div class="progress-ring">
+                <svg viewBox="0 0 100 100">
+                    <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                    <circle id="memRing" class="ring-fill" cx="50" cy="50" r="42"
+                            style="stroke: var(--accent-green);"></circle>
+                </svg>
+                <div class="percentage" id="memText">0%</div>
+            </div>
+            <div class="chart-label">内存占用</div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-row" id="info-node-name">
+            <span class="info-title">节点名称</span>
+            <span class="info-content">Unknown</span>
+        </div>
+        <div class="info-row" id="info-server">
+            <span class="info-title">服务器系统</span>
+            <span class="info-content">Unknown</span>
+        </div>
+        <div class="info-row" id="info-ip">
+            <span class="info-title">公网地址</span>
+            <span class="info-content ip-hidden">
+                <span class="masked">***.***.***.***</span>
+                <span class="real-ip">Unknown</span>
+            </span>
+        </div>
+        <div class="info-row" id="info-kernel">
+            <span class="info-title">内核版本</span>
+            <span class="info-content">Unknown</span>
+        </div>
+        <div class="info-row" id="info-uptime">
+            <span class="info-title">开机时长</span>
+            <span class="info-content">Unknown</span>
+        </div>
+        <div class="info-row" id="info-traffic-up">
+            <span class="info-title">上行流量</span>
+            <span class="info-content">Unknown</span>
+        </div>
+        <div class="info-row" id="info-traffic-down">
+            <span class="info-title">下行流量</span>
+            <span class="info-content">Unknown</span>
+        </div>
+    </div>
+</main>
+
+<script>
+    const circumference = 2 * Math.PI * 42;
+
+    function updateRing(id, percent) {
+        const circle = document.getElementById(`${id}Ring`);
+        const text = document.getElementById(`${id}Text`);
+
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = (circumference - (percent / 100 * circumference)).toString();
+        text.innerText = Math.round(percent) + '%';
+        if (percent > 80) {
+            circle.style.stroke = 'var(--accent-red)';
+        } else if (percent > 50) {
+            circle.style.stroke = 'var(--accent-yellow)';
+        } else if (percent > 30) {
+            circle.style.stroke = 'var(--accent-blue)';
+        } else {
+            circle.style.stroke = 'var(--accent-green)';
+        }
+    }
+
+    function updateInfo(id, value) {
+        const info = document.getElementById(`info-${id}`);
+        const contentSpan = info.querySelector('.info-content');
+        if (id === 'ip') {
+            const realIpSpan = contentSpan.querySelector('.real-ip');
+            if (realIpSpan) {
+                realIpSpan.innerText = value;
+            }
+        } else {
+            contentSpan.innerText = value;
+        }
+    }
+
+    window.addEventListener('message', function (event) {
+        const msg = event.data;
+        if (msg['type'] === 'updateStats') {
+            const data = msg['info'];
+            if (data['info_cpu']) updateRing('cpu', data['info_cpu']);
+            if (data['info_mem']) updateRing('mem', data['info_mem']);
+            if (data['info_node_name']) updateInfo('node-name', data['info_node_name']);
+            if (data['info_server']) updateInfo('server', data['info_server']);
+            if (data['info_ip']) updateInfo('ip', data['info_ip']);
+            if (data['info_kernel']) updateInfo('kernel', data['info_kernel']);
+            if (data['info_uptime']) updateInfo('uptime', parseTime(data['info_uptime']));
+            if (data['info_bw_up']) updateInfo('traffic-up', parseNetwork(data['info_bw_up']));
+            if (data['info_bw_down']) updateInfo('traffic-down', parseNetwork(data['info_bw_down']));
+        }
+    });
+
+    function parseNetwork(bytes) {
+        bytes = bytes / 2
+        let res
+        if (bytes < 1024) {
+            res = bytes + ' B';
+        } else if (bytes < 1024 * 1024) {
+            res = (bytes / 1024).toFixed(2) + ' KB';
+        } else if (bytes < 1024 * 1024 * 1024) {
+            res = (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        } else {
+            res = (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+        return res + '/s'
+    }
+
+    function parseTime(seconds) {
+        const d = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        return `${d} days ${hh} hours ${mm} min`;
+    }
+
+    updateRing('cpu', 0)
+    updateRing('mem', 0)
+    updateInfo('server', 'Unknown');
+    updateInfo('ip', 'Unknown');
+    updateInfo('kernel', 'Unknown');
+    updateInfo('uptime', 'Unknown');
+    updateInfo('traffic-up', 'Unknown');
+    updateInfo('traffic-down', 'Unknown');
+</script>
+</body>
+</html>

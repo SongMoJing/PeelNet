@@ -1,0 +1,11 @@
+info:
+    author: "松蓦箐 <Song_Mojing@outlook.com>"
+    config_load_success: "配置文件加载成功"
+error:
+    path_invalid: "无法找到有效的文件路径"
+    unexpected_error: "意外错误"
+    invalid_data: "无效数据，path=%{path}"
+    permission_denied: "权限被拒绝"
+tag:
+    read_config: "读取配置文件"
+

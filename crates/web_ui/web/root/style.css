@@ -1,0 +1,41 @@
+:root {
+    --dark-green: #142d27;
+    --accent-green: #10b981;
+    --soft-green: #dcfce7;
+
+    --dark-blue: #2c54c3;
+    --accent-blue: #3b82f6;
+    --soft-blue: #f0f7ff;
+
+    --dark-yellow: #b59f3b;
+    --accent-yellow: #f59e0b;
+    --soft-yellow: #fef3c7;
+
+    --dark-red: #b02a37;
+    --accent-red: #ef4444;
+    --soft-red: #fee2e2;
+
+    --background: #fafafa;
+    --sidebar-width: 260px;
+}
+
+* {
+    scrollbar-width: none;
+}
+
+body, html {
+    margin: 0;
+    font-family: sans-serif;
+    background: var(--soft-blue);
+    height: 100%;
+}
+
+.wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+}

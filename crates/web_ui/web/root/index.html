@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeeLServer - 控制台</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --nav-height: 60px;
+        }
+
+        *, *::before, *::after {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            overflow: hidden !important;
+        }
+
+        *::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        *::-webkit-scrollbar-track {
+            display: none !important;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            display: none !important;
+        }
+
+        body, html {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden !important;
+            background-color: var(--soft-blue);
+            overscroll-behavior: none; /* 防止过度滚动 */
+        }
+
+        .main-layout {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: row;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .content-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark-green);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 40px 30px;
+            color: white;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            padding: 16px 30px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--dark-blue);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent-blue);
+        }
+
+        .content-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+
+            .content-frame {
+                display: block;
+                box-sizing: border-box;
+                padding-bottom: var(--nav-height);
+            }
+
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: column;
+            }
+
+            .sidebar-header {
+                display: none;
+            }
+
+            .sidebar-footer {
+                order: -1;
+                padding: 0 0 !important;
+                background: rgba(0, 0, 0, 0.3);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            #websocket-status {
+                margin: 10px !important;
+                font-size: 13px;
+            }
+
+            #copyright {
+                display: none;
+            }
+
+            .nav-menu {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                height: var(--nav-height);
+                flex-direction: row;
+                padding: 0;
+                background-color: var(--dark-green);
+                z-index: 1000;
+            }
+
+            .nav-item {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+
+            .nav-item.active {
+                border-bottom-color: var(--accent-blue) !important;
+            }
+
+            .nav-item:hover {
+                border-bottom-color: var(--dark-blue) !important;
+            }
+        }
+
+        .sidebar-footer {
+            padding: 20px 30px;
+        }
+
+        #copyright {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        #websocket-status {
+            display: block;
+            color: rgb(255, 255, 255);
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        #watermark-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+            background-repeat: repeat;
+            opacity: 0.3;
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 30px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .user-name {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">PeeL Server</div>
+            <div class="user-name">@song-mojing</div>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item" target="welcome">节点</div>
+            <div class="nav-item" target="cluster">集群</div>
+            <div class="nav-item" target="connect">客户端</div>
+            <div class="nav-item active" target="control">主控</div>
+        </div>
+        <div class="sidebar-footer">
+            <div id="websocket-status"></div>
+            <div id="copyright">&copy; 2026 PeeL Server</div>
+        </div>
+    </nav>
+    <div class="content-container" style="flex: 1; position: relative;">
+        <iframe id="page-welcome" src="welcome.html" class="content-frame" style="display: none;"></iframe>
+        <iframe id="page-cluster" src="cluster.html" class="content-frame" style="display: none;"></iframe>
+        <iframe id="page-connect" src="connect.html" class="content-frame" style="display: none;"></iframe>
+        <iframe id="page-control" src="control.html" class="content-frame" style="display: none;"></iframe>
+    </div>
+</div>
+
+<script>
+    const items = document.querySelectorAll('.nav-item');
+    const websocketStatus = document.getElementById('websocket-status');
+    const iframes = document.querySelectorAll('.content-frame');
+    let socket;
+
+    items.forEach(item => {
+        item.addEventListener('click', function () {
+            const pageId = `page-${item.getAttribute('target')}`;
+            items.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            iframes.forEach(frame => {
+                frame.style.display = (frame.id === pageId) ? 'block' : 'none';
+            });
+        });
+    });
+
+    function connectWebSocket() {
+        if (socket) {
+            socket.close();
+        }
+        socket = new WebSocket(`wss://${location.hostname}:${location.port}/api/ws`);
+        websocketStatus.textContent = '正在连接 Web Socket...';
+        websocketStatus.style.color = `var(--soft-yellow)`;
+        socket.onopen = () => {
+            websocketStatus.textContent = 'Web Socket 已连接';
+            websocketStatus.style.color = 'var(--soft-green)';
+            websocketStatus.removeEventListener('click', connectWebSocket);
+            websocketStatus.style.cursor = 'auto';
+        };
+        socket.onerror = (error) => {
+            console.error('WebSocket 发生错误: ', error);
+        };
+        socket.onclose = () => {
+            websocketStatus.textContent = 'Web Socket 已断开，点击重试';
+            websocketStatus.style.color = `var(--soft-red)`;
+            websocketStatus.addEventListener('click', () => {
+                if (socket.readyState === WebSocket.CLOSED) {
+                    connectWebSocket();
+                }
+            });
+            websocketStatus.style.cursor = 'pointer';
+        };
+        socket.onmessage = (event) => {
+            handleMessage(event)
+        };
+        socket.onerror = (error) => {
+            console.error('WebSocket 发生错误: ', error);
+            if (location.pathname !== '/' && location.pathname !== '/index.html') {
+                window.location.href = '/';
+            }
+        };
+    }
+
+    function handleMessage(event) {
+        const message = JSON.parse(event.data);
+        switch (message['type']) {
+            case 'updateStats':
+                iframes.forEach(frame => {
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage(message, '*');
+                    }
+                });
+                break;
+            case 'Receipt':
+                break;
+        }
+    }
+
+    function disconnectWebSocket() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+    }
+
+    function sendCommand(cmd) {
+        if (!socket) {
+            return;
+        }
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(cmd);
+        } else if (socket.readyState === WebSocket.CLOSED) {
+            // 如果连接已关闭，可能是因为认证失败，重定向到登录页
+            if (location.pathname !== '/' && location.pathname !== '/index.html') {
+                window.location.href = '/';
+            }
+        }
+    }
+
+    window.onload = () => {
+        connectWebSocket();
+        items[3].click();
+    };
+
+    // 添加拦截所有fetch请求的功能，捕获401错误
+    const originalFetch = window.fetch;
+    window.fetch = function (...args) {
+        return originalFetch.apply(this, args).then(response => {
+            if (response.status === 401) {
+                // 如果是401错误，重定向到登录页
+                if (location.pathname !== '/' && location.pathname !== '/index.html') {
+                    window.location.href = '/';
+                }
+            }
+            return response;
+        }).catch(error => {
+            // 如果请求出错，也可能是认证问题
+            console.error('请求出错:', error);
+            if (location.pathname !== '/' && location.pathname !== '/index.html') {
+                window.location.href = '/';
+            }
+            throw error;
+        });
+    };
+
+    // 监听WebSocket连接错误，当遇到认证错误时重定向到登录页
+    window.addEventListener('beforeunload', function () {
+        if (socket) {
+            socket.onclose = null; // 移除之前的onclose处理程序
+        }
+    });
+
+    function createWatermark(text) {
+        const root = document.querySelector('.main-layout');
+        if (document.getElementById('watermark-container') === null) {
+            // 创建水印容器
+            const watermarkContainer = document.createElement('div');
+            watermarkContainer.id = 'watermark-container';
+            root.appendChild(watermarkContainer);
+        }
+        const canvas = document.createElement('canvas');
+        const width = 200;
+        const height = 400;
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.font = "18px Arial";
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const drawText = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(-30 * Math.PI / 180);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        };
+        drawText(width / 2, height / 2);
+        drawText(0, 0);
+        drawText(width, 0);
+        drawText(0, height);
+        drawText(width, height);
+        const base64Url = canvas.toDataURL();
+        const container = document.getElementById('watermark-container');
+        container.style.backgroundImage = `url(${base64Url})`;
+        const observer = new MutationObserver(() => {
+            const wm = document.getElementById('watermark-container');
+            const update = () => {
+                observer.disconnect();
+                createWatermark("song-mojing");
+            };
+            if (!wm) update()
+            else if (wm.getAttribute('style').indexOf('display: none') !== -1) update()
+            else if (wm.style.backgroundImage !== `url(${base64Url})`) update()
+        });
+        observer.observe(document.body, {
+            attributes: true,
+            childList: true,
+            subtree: true
+        });
+    }
+
+    createWatermark("song-mojing");
+</script>
+</body>
+</html>

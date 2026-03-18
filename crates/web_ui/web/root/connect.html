@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>客户端信息 - PeeLServer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .list {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            position: relative;
+        }
+
+        .list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .session-item {
+            border-left: 4px solid var(--accent-blue);
+            background: #f8fafc;
+            padding: 15px;
+            border-bottom: 1px solid #edf2f7;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 60px 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .regex-badge {
+            position: absolute;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px solid #e2e8f0;
+        }
+
+        input[type="checkbox"]#regexToggle {
+            display: none;
+        }
+
+        input[type="checkbox"]#regexToggle:checked + .regex-badge {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .session-item strong {
+            color: var(--dark-green);
+            font-size: 1rem;
+        }
+
+        .session-item small {
+            color: #64748b;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <main class="main-content">
+        <h2 style="color: var(--dark-green); margin: 0 0 10px 0;">接入客户端详情</h2>
+
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="搜索 Session ID、地址或加密方式...">
+            <input type="checkbox" id="regexToggle">
+            <label for="regexToggle" class="regex-badge" title="切换正则表达式模式">RE</label>
+        </div>
+
+        <div class="list" id="sessionList">
+            <div id="phantom" style="position: absolute; left: 0; top: 0; right: 0; z-index: -1;"></div>
+            <div id="contentContainer" style="position: absolute; left: 0; top: 0; right: 0;"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const allSessions = [];
+    for (let i = 0; i < 1000; i++) {
+        allSessions.push({
+            id: i,
+            sessionId: `#${i + 8000}`,
+            location: [
+                '上海', '北京', '广州', '深圳', '杭州',
+                '天津', '西安', '武汉', '南京', '厦门',
+                '长沙', '苏州', '郑州', '青岛', '济南',
+                '石家庄', '太原', '昆明'
+            ][Math.floor(Math.random() * 3)],
+            encryption: ['AES-256', 'RSA-2048', 'ChaCha20-Poly1305'][Math.floor(Math.random() * 3)],
+            latency: Math.floor(Math.random() * 100) + 1
+        });
+    }
+
+    let displaySessions = [...allSessions];
+    const itemHeight = 80;
+    const container = document.getElementById('sessionList');
+    const phantom = document.getElementById('phantom');
+    const contentContainer = document.getElementById('contentContainer');
+    const searchInput = document.getElementById('searchInput');
+    const regexToggle = document.getElementById('regexToggle');
+
+    let visibleCount = Math.ceil(container.clientHeight / itemHeight) + 2;
+    let debounceTimer = null;
+
+    function initVirtualScroll() {
+        refreshContainer();
+        container.addEventListener('scroll', updateVisibleItems);
+        window.addEventListener('resize', () => {
+            visibleCount = Math.ceil(container.clientHeight / itemHeight) + 2;
+            updateVisibleItems();
+        });
+
+        // 防抖处理：停止修改 1 秒后开始搜索
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 1000);
+        });
+
+        regexToggle.addEventListener('change', performSearch);
+    }
+
+    function performSearch() {
+        const keyword = searchInput.value.trim();
+        const isRegexMode = regexToggle.checked;
+
+        if (!keyword) {
+            displaySessions = [...allSessions];
+        } else {
+            displaySessions = allSessions.filter(item => {
+                if (isRegexMode) {
+                    try {
+                        // 使用正则表达式匹配 SessionID 和 地址
+                        const regex = new RegExp(keyword, 'i');
+                        return regex.test(item.sessionId) || regex.test(item.location);
+                    } catch (e) {
+                        return false;
+                    }
+                } else {
+                    // 正常匹配模式
+                    const lowKey = keyword.toLowerCase();
+                    return item.sessionId.toLowerCase().includes(lowKey) ||
+                        item.location.includes(lowKey) ||
+                        item.encryption.toLowerCase().includes(lowKey) ||
+                        String(item.latency).includes(lowKey);
+                }
+            });
+        }
+        container.scrollTop = 0;
+        refreshContainer();
+    }
+
+    function refreshContainer() {
+        phantom.style.height = `${displaySessions.length * itemHeight}px`;
+        updateVisibleItems();
+    }
+
+    function updateVisibleItems() {
+        const scrollTop = container.scrollTop;
+        const startIndex = Math.floor(scrollTop / itemHeight);
+        const endIndex = Math.min(startIndex + visibleCount, displaySessions.length);
+        const offsetY = startIndex * itemHeight;
+
+        contentContainer.style.transform = `translate3d(0, ${offsetY}px, 0)`;
+
+        if (displaySessions.length === 0) {
+            contentContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8;">未找到匹配的客户端</div>';
+            return;
+        }
+
+        contentContainer.innerHTML = displaySessions.slice(startIndex, endIndex).map(session => `
+            <div class="session-item" style="height: ${itemHeight}px;">
+                <div><strong>Session ${session.sessionId}</strong> - ${session.location}</div>
+                <div><small>加密: ${session.encryption} | 延迟: ${session.latency}ms</small></div>
+            </div>
+        `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', initVirtualScroll);
+</script>
+</body>
+</html>
