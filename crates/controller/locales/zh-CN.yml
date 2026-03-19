@@ -1,8 +1,13 @@
 tag:
-    netController_service: "NetController 接口服务"
+    netController_service:
+        self: "NetController 接口服务"
+        loadCA: "NetController 证书加载"
 log:
     enable: "已启动"
     netService:
         enable: "网络控制服务已启动于 %{addr}:%{port}"
-        enable_ca: "已启用 CA 证书验证客户端身份"
-        enable_authorizedKeys: "已启用客户端公钥验证客户端身份"
+        ca:
+            load: "已加载 %{count} 个 CA 根证书"
+error:
+    netService:
+        start: "无法启动网络控制服务\n%{err}"

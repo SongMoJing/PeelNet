@@ -1,16 +1,15 @@
 #[macro_use]
 extern crate rust_i18n;
 
+use std::fs;
 use directories::BaseDirs;
 use global::config::Config;
 use global::io::Log;
 use lazy_static::lazy_static;
-use std::io::ErrorKind;
-use std::path::PathBuf;
+use std::io::{Error, ErrorKind};
+use std::path::{Path, PathBuf};
 use std::process::exit;
 use std::sync::OnceLock;
-
-mod model_config;
 
 i18n!("locales", fallback = "zh-CN");
 
@@ -45,11 +44,11 @@ async fn main() {
     print_hello();
     if let Some(config) = CONFIG.get() {
         controller::start_controller_service(config);
-        if let Some(net_controller) = &config.server.network_controller {
-            controller::start_net_controller_service(net_controller);
+        if let Some(net_controller) = &config.controller.network_controller {
+            controller::start_net_controller_service(net_controller, &config.controller.ca, &config.controller.jwt).await;
         }
-        if let Some(web_ui) = &config.server.web_ui {
-            web_ui::start_web_ui_service(web_ui);
+        if let Some(web_ui) = &config.controller.web_ui {
+            web_ui::start_web_ui_service(web_ui, &config.controller.ca, &config.controller.jwt);
         }
     } else {
         Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();
@@ -58,7 +57,15 @@ async fn main() {
 }
 
 fn check_config() {
-    match model_config::load_config(PATH_FILE_CONFIG.as_path()) {
+    fn load_config(path: &Path) -> Result<Config, Error> {
+        if !path.exists() {
+            return Err(Error::new(ErrorKind::NotFound, "config file not found"));
+        }
+        let content = fs::read_to_string(path)?;
+        Ok(toml::from_str(&content).map_err(|e| Error::new(ErrorKind::InvalidData, e))?)
+    }
+
+    match load_config(PATH_FILE_CONFIG.as_path()) {
         Ok(config) => {
             CONFIG.set(config).unwrap_or_else(|_| {
                 Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();

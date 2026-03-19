@@ -1,44 +1,37 @@
-[server]
-feature = { webui = true, tui = true }
+[controller.ca]
+# 根证书
+cert_ca = "/path/to/rootCA.crt"
+# 服务端证书
+cert_server = "/path/to/server.crt"
+# 服务端密钥 严格保密
+cert_key = "/path/to/server.key"
+
+[controller.jwt]
+# jwt token过期时间（秒）
+expiration = 86400
+# jwt token签名密钥 严格保密
+secret = "secret"
 
 # web控制台配置
-[server.wui]
+[controller.web_ui]
 # web控制台监听端口
 port = 9771
 # web控制台监听地址
-addr = [
-    "0.0.0.0"
-]
-
-[server.wui.ca]
-# 根证书
-cert_ca = "/path/to/rootCA.crt"
-# 服务端证书
-cert_server = "/path/to/server.crt"
-# 服务端密钥 严格保密
-cert_key = "/path/to/server.key"
+addr = "0.0.0.0"
 
 # tui控制台配置
-[server.tui]
-# tui控制台授权方式
-feature = { ca = true, authorized_keys = true }
+[controller.network_controller]
 # tui控制台监听端口
 port = 9772
 # tui控制台监听地址
-addr = [
-    "0.0.0.0"
-]
+addr = "0.0.0.0"
 
-[server.tui.ca]
-# 根证书
-cert_ca = "/path/to/rootCA.crt"
-# 服务端证书
-cert_server = "/path/to/server.crt"
-# 服务端密钥 严格保密
-cert_key = "/path/to/server.key"
-
-[server.tui.authorized_keys]
-# 允许登入的公钥与其对应的用户
-authorized_keys = [
-    { user = "user", keys = "/path/to/user/authorized_keys" }
-]
+[data_sources.redis]
+# redis连接池配置
+url = "redis://peel:<PASSWORD>@localhost:6379/0"
+# 连接超时
+timeout_sec = 5
+# 最大连接数
+max_connections = 8
+# 最大空闲连接数
+max_idle_connections = 4
