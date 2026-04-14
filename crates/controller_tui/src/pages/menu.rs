@@ -3,7 +3,6 @@ use crate::model::saved::Saved;
 use crate::model::state::State;
 use cursive::event::Key;
 use cursive::menu::Tree;
-use cursive::style::{Color, ColorStyle, PaletteColor};
 use cursive::traits::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView, LinearLayout, NamedView, Panel, ResizedView, TextView};
 use cursive::Cursive;

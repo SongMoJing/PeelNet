@@ -1,5 +1,5 @@
-use global::config::{CAConfig, JWTConfig};
-use global::io::Log;
+use core_global::config::{CAConfig, JWTConfig};
+use core_global::io::Log;
 use rust_i18n::t;
 use std::sync::Arc;
 use tokio::net::TcpListener;

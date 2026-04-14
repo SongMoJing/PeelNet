@@ -1,7 +1,7 @@
 mod net_server;
 
-use global::config::{CAConfig, Config, JWTConfig, NetworkControllerConfig};
-use global::io::Log;
+use core_global::config::{CAConfig, Config, JWTConfig, NetworkControllerConfig};
+use core_global::io::Log;
 use rust_i18n::{i18n, t};
 
 i18n!("locales", fallback = "zh-CN");

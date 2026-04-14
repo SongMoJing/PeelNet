@@ -7,13 +7,13 @@
 ```
 peel/
 ├── crates/   ------------------------ 模块
-│   ├── server/   ---------------------- (bin) 核心服务
-│   ├── controllar/   ---------------- (lib) 控制台服务
-│   ├── net_client/   ---------------- (lib) 客户端库
-│   ├── net_server/   ---------------- (lib) 面向客户端的网络服务
-│   ├── web_ui/   -------------------- (lib) WebUI控制台服务
-│   ├── models/   -------------------- (lib) 数据模型
-│   └── client_tui_controller/   ------- (bin) 客户端TUI控制台
+│   ├── core_server/   ----------------- (bin) 核心服务
+│   ├── core_global/   --------------- (lib) 公共库
+│   ├── controller_core/   ----------- (lib) 控制台服务 -> 客户端接口服务
+│   ├── controller_web_ui/   --------- (lib) WebUI控制台服务
+│   ├── controller_tui/   -------------- (bin) 客户端TUI控制台
+│   ├── net_client/   ---------------- (lib) 客户端库 -> PeeL-Client
+│   └── net_server/   ---------------- (lib) 面向普通网络客户端的网络服务
 └── Cargo.toml
 ```
 
@@ -23,7 +23,7 @@ peel/
 
 ### 配置管理员密钥，推荐采用OpenSSL生成
 
-```shell
+```bash
 # 定义路径
 export KEY_PATH=/path/to/key
 
@@ -59,7 +59,7 @@ openssl pkcs12 -export \
 
 2. 双击并导入 client.p12（安装时需输入生成时设置的密码）
 
-3. 访问 https://YOUR_IP:9771，浏览器会弹出窗口要求选择证书，确认即可
+3. 访问 https://Your_server_ip:9771，浏览器会弹出窗口要求选择证书，确认即可
 
 ### 打开配置文件，填入相应信息
 
@@ -67,7 +67,7 @@ openssl pkcs12 -export \
 # 根证书
 cert_ca = "/path/to/rootCA.crt" # 填入根证书路径 `$KEY_PATH/rootCA.crt`
 # 服务端证书
-cert_server = "/path/to/server.crt" # 填入服务端证书路径 `$KEY_PATH/server.crt`
+cert_server = "/path/to/server.crt" # 填入服务端证书路径 `$KEY_PATH/core_server.crt`
 # 服务端密钥 严格保密
-cert_key = "/path/to/server.key" # 填入服务端密钥路径 `$KEY_PATH/server.key`
+cert_key = "/path/to/server.key" # 填入服务端密钥路径 `$KEY_PATH/core_server.key`
 ```

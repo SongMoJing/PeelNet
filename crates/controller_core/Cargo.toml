@@ -1,13 +1,13 @@
 [package]
-name = "controller"
+name = "controller_core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-global = { path = "../global" }
+core_global = { path = "../core_global" }
 
-rust-i18n = "3"
+rust-i18n = "4.0.0"
 tokio-rustls = "0.26.4"
 rustls-pemfile = "2.2.0"
 tokio = { version = "1.50.0", features = ["full"] }

@@ -3,8 +3,8 @@ extern crate rust_i18n;
 
 use std::fs;
 use directories::BaseDirs;
-use global::config::Config;
-use global::io::Log;
+use core_global::config::Config;
+use core_global::io::Log;
 use lazy_static::lazy_static;
 use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
@@ -16,10 +16,10 @@ i18n!("locales", fallback = "zh-CN");
 lazy_static! {
     static ref VERTION: &'static str = env!("CARGO_PKG_VERSION");
     static ref PATH_FILE_CONFIG: PathBuf = BaseDirs::new().map(|base|
-        // Windows: ~AppData\Roaming\peel_net\server.toml
-        // Linux  : ~/.config/peel_net/server.toml
-        // macOS  : ~/Library/Application Support/peel_net/server.toml
-        base.config_dir().join("peel_net").join("server").join("server.toml")
+        // Windows: ~AppData\Roaming\peel_net\core_server.toml
+        // Linux  : ~/.config/peel_net/core_server.toml
+        // macOS  : ~/Library/Application Support/peel_net/core_server.toml
+        base.config_dir().join("peel_net").join("core_server").join("core_server.toml")
     ).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
         exit(1);
@@ -28,7 +28,7 @@ lazy_static! {
         // Windows: ~\AppData\Local\peel_net\logs
         // Linux  : ~/.local/share/peel_net/logs
         // macOS  : ~/Library/Application Support/peel_net/logs
-        base.data_local_dir().join("peel_net").join("server").join("logs")
+        base.data_local_dir().join("peel_net").join("core_server").join("logs")
     }).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
         exit(1);
@@ -43,12 +43,12 @@ async fn main() {
     check_config();
     print_hello();
     if let Some(config) = CONFIG.get() {
-        controller::start_controller_service(config);
+        controller_core::start_controller_service(config);
         if let Some(net_controller) = &config.controller.network_controller {
-            controller::start_net_controller_service(net_controller, &config.controller.ca, &config.controller.jwt).await;
+            controller_core::start_net_controller_service(net_controller, &config.controller.ca, &config.controller.jwt).await;
         }
         if let Some(web_ui) = &config.controller.web_ui {
-            web_ui::start_web_ui_service(web_ui, &config.controller.ca, &config.controller.jwt);
+            controller_web_ui::start_web_ui_service(web_ui, &config.controller.ca, &config.controller.jwt);
         }
     } else {
         Log::i(t!("tag.read_config"), t!("error.unexpected_error")).print();
