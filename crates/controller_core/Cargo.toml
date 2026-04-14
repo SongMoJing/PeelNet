@@ -1,11 +1,11 @@
 [package]
-name = "controller"
+name = "controller_core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-global = { path = "../global" }
+core_global = { path = "../core_global" }
 
 rust-i18n = "3"
 tokio-rustls = "0.26.4"

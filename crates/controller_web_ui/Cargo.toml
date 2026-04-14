@@ -1,9 +1,11 @@
 [package]
-name = "net_server"
+name = "controller_web_ui"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
 core_global = { path = "../core_global" }
-core_server = { path = "../core_server" }
+controller_core = { path = "../controller_core" }
+
+rust-i18n = "3"

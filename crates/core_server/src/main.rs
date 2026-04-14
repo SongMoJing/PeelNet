@@ -16,10 +16,10 @@ i18n!("locales", fallback = "zh-CN");
 lazy_static! {
     static ref VERTION: &'static str = env!("CARGO_PKG_VERSION");
     static ref PATH_FILE_CONFIG: PathBuf = BaseDirs::new().map(|base|
-        // Windows: ~AppData\Roaming\peel_net\server.toml
-        // Linux  : ~/.config/peel_net/server.toml
-        // macOS  : ~/Library/Application Support/peel_net/server.toml
-        base.config_dir().join("peel_net").join("server").join("server.toml")
+        // Windows: ~AppData\Roaming\peel_net\core_server.toml
+        // Linux  : ~/.config/peel_net/core_server.toml
+        // macOS  : ~/Library/Application Support/peel_net/core_server.toml
+        base.config_dir().join("peel_net").join("core_server").join("core_server.toml")
     ).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
         exit(1);
@@ -28,7 +28,7 @@ lazy_static! {
         // Windows: ~\AppData\Local\peel_net\logs
         // Linux  : ~/.local/share/peel_net/logs
         // macOS  : ~/Library/Application Support/peel_net/logs
-        base.data_local_dir().join("peel_net").join("server").join("logs")
+        base.data_local_dir().join("peel_net").join("core_server").join("logs")
     }).unwrap_or_else(|| {
         Log::e("error", t!("error.path_invalid")).print();
         exit(1);

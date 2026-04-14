@@ -1,12 +1,12 @@
 [workspace]
 members = [
-    "crates/server",
-    "crates/controller",
+    "crates/core_server",
+    "crates/core_global",
+    "crates/controller_core",
+    "crates/controller_web_ui",
+    "crates/controller_tui",
     "crates/net_client",
-    "crates/net_server",
-    "crates/web_ui",
-    "crates/client_tui_controller",
-    "crates/global"
+    "crates/net_server"
 ]
 resolver = "2"
 

@@ -1,13 +1,13 @@
 [package]
-name = "server"
+name = "core_server"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-global = { path = "../global" }
-controller = { path = "../controller" }
-web_ui = { path = "../web_ui" }
+core_global = { path = "../core_global" }
+controller_core = { path = "../controller_core" }
+controller_web_ui = { path = "../controller_web_ui" }
 
 directories = "6.0.0"
 rust-i18n = "3"

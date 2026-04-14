@@ -5,4 +5,4 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-global = { path = "../global" }
+core_global = { path = "../core_global" }
