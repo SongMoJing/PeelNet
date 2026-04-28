@@ -35,18 +35,19 @@ impl Page for IndexPage {
         ))
         .center()
         .with_name("header");
+        let monitor = LinearLayout::horizontal().child(TextView::new("未连接").with_name("monitor:target"));
         let content = Panel::new(
             create_def_panel(self.saved.clone())
                 .full_screen()
                 .with_name("content"),
         )
-        .with_name("board");
-        let monitor =
-            LinearLayout::horizontal().child(TextView::new("未连接").with_name("monitor:target"));
+            .with_name("board");
+        let breadcrumb = LinearLayout::horizontal().child(TextView::new("page: welcome").with_name("monitor:target"));
         LinearLayout::vertical()
             .child(header)
-            .child(content)
             .child(monitor)
+            .child(content)
+            .child(breadcrumb)
     }
 }
 

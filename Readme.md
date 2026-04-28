@@ -7,11 +7,11 @@
 ```
 peel/
 ├── crates/   ------------------------ 模块
-│   ├── core_server/   ----------------- (bin) 核心服务
-│   ├── core_global/   --------------- (lib) 公共库
 │   ├── controller_core/   ----------- (lib) 控制台服务 -> 客户端接口服务
-│   ├── controller_web_ui/   --------- (lib) WebUI控制台服务
 │   ├── controller_tui/   -------------- (bin) 客户端TUI控制台
+│   ├── controller_web_ui/   --------- (lib) WebUI控制台服务
+│   ├── core_global/   --------------- (lib) 公共库
+│   ├── core_server/   ----------------- (bin) 核心服务
 │   ├── net_client/   ---------------- (lib) 客户端库 -> PeeL-Client
 │   └── net_server/   ---------------- (lib) 面向普通网络客户端的网络服务
 └── Cargo.toml
