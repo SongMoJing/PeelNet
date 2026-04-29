@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/controller_web_ui/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/core_global/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/core_server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/controller_gui/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

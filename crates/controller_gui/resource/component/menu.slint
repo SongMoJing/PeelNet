@@ -1,0 +1,65 @@
+import { HorizontalBox, Palette, VerticalBox } from "std-widgets.slint";
+
+export struct SubMenuItem {
+    text: string,
+    enabled: bool,
+    is_separator: bool,
+}
+
+export struct MenuItem {
+    alt_key: string,
+    text: string,
+    children: [SubMenuItem],
+}
+
+export component Menu inherits Rectangle {
+    in property <[MenuItem]> menu_data;
+    callback item_clicked(SubMenuItem);
+    private property <MenuItem> selected;
+
+    height: 30px;
+    background: Palette.alternate-background;
+
+    menu := PopupWindow {
+        x: 0; y: 30px;
+        Rectangle {
+            background: Palette.alternate-background;
+            border-color: Palette.border;
+            border-width: 1px;
+            VerticalBox {
+                padding: 4px;
+                spacing: 0;
+            }
+        }
+    }
+
+    HorizontalBox {
+        alignment: start;
+        padding-left: 10px;
+        spacing: 10px;
+
+        for item[index] in root.menu_data : Rectangle {
+            padding: 3px;
+            HorizontalBox {
+                spacing: 2px;
+                Text {
+                    text: item.text;
+                    color: Palette.foreground;
+                }
+                if (item.alt_key != "") : Text {
+                    text: "(" + item.alt_key + ")";
+                    color: Palette.accent-background;
+                    font-italic: true;
+                }
+            }
+
+            ta := TouchArea {
+                clicked => {
+                    selected = item;
+                    menu.show();
+                }
+            }
+            background: ta.has-hover ? Palette.border : Colors.transparent;
+        }
+    }
+}

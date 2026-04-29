@@ -4,7 +4,7 @@ members = [
     "crates/core_global",
     "crates/controller_core",
     "crates/controller_web_ui",
-    "crates/controller_tui",
+    "crates/controller_gui",
     "crates/net_client",
     "crates/net_server"
 ]

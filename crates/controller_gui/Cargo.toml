@@ -1,0 +1,10 @@
+[package]
+name = "controller_gui"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+slint = "1.16.1"
+[build-dependencies]
+slint-build = "1.16.1"
