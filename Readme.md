@@ -8,7 +8,7 @@
 peel/
 ├── crates/   ------------------------ 模块
 │   ├── controller_core/   ----------- (lib) 控制台服务 -> 客户端接口服务
-│   ├── controller_gui/   -------------- (bin) 客户端GUI控制
+│   ├X─ controller_gui/   -------------- (bin) 客户端GUI控制
 │   ├── controller_web_ui/   --------- (lib) WebUI控制台服务
 │   ├── core_global/   --------------- (lib) 公共库
 │   ├── core_server/   ----------------- (bin) 核心服务
