@@ -1,7 +1,10 @@
+mod component;
+
 use iced::advanced::Widget;
 use iced::widget::{button, column, container, mouse_area, row, rule, stack, text}; // 确保这里是小写的 rule
 use iced::window::{icon, Icon, Settings};
 use iced::{Alignment, Element, Length, Padding, Theme};
+use crate::component::menu::{Menu, MenuItem};
 
 fn main() -> iced::Result {
     iced::application(AppState::default, AppState::update, AppState::view)
@@ -83,6 +86,24 @@ impl AppState {
         }
     }
 
+    fn get_active_menu_data(&self) -> Option<Menu> {
+        match self.active_menu {
+            MenuType::File => Some(Menu::new(vec![
+                MenuItem::Item { enable: true, name: "打开文件".into(), action: "OpenFile", child: None },
+                MenuItem::Item { enable: true, name: "保存".into(), action: "SaveFile", child: None },
+                MenuItem::Separator,
+                MenuItem::Item { enable: false, name: "退出".into(), action: "Exit", child: None },
+            ])),
+            MenuType::Connect => Some(Menu::new(vec![
+                MenuItem::Item { enable: true, name: "新建连接".into(), action: "NewConnect", child: None },
+            ])),
+            MenuType::Help => Some(Menu::new(vec![
+                MenuItem::Item { enable: true, name: "关于".into(), action: "About", child: None },
+            ])),
+            MenuType::None => None,
+        }
+    }
+
     pub fn view(&self) -> Element<'_, Message> {
         // 顶部菜单按钮
         let menu_bar = row![
@@ -140,34 +161,11 @@ impl AppState {
 
         // 菜单 PopupWindow 逻辑
         if self.active_menu != MenuType::None {
-            // 点击遮罩关闭菜单
             let overlay = mouse_area(container(column![]).width(Length::Fill).height(Length::Fill))
                 .on_press(Message::ToggleMenu(MenuType::None))
                 .interaction(iced::mouse::Interaction::Idle);
 
-            let menu_items = match self.active_menu {
-                MenuType::File => column![
-                    button("打开文件")
-                        .on_press(Message::MenuAction("OpenFile"))
-                        .width(150)
-                        .style(button::text),
-                    button("保存")
-                        .on_press(Message::MenuAction("SaveFile"))
-                        .width(150)
-                        .style(button::text),
-                ],
-                MenuType::Connect => column![button("新建连接")
-                    .on_press(Message::MenuAction("NewConnect"))
-                    .width(150)
-                    .style(button::text),],
-                MenuType::Help => column![button("关于")
-                    .on_press(Message::MenuAction("About"))
-                    .width(150)
-                    .style(button::text),],
-                _ => column![],
-            }
-            .spacing(2);
-
+            // 获取偏移量
             let x_offset = match self.active_menu {
                 MenuType::File => 5.0,
                 MenuType::Connect => 60.0,
@@ -175,15 +173,20 @@ impl AppState {
                 _ => 0.0,
             };
 
-            let menu_popup = container(
-                container(menu_items).padding(5).style(container::secondary),
-            )
-            .padding(Padding {
-                top: 35.0,
-                right: 0.0,
-                bottom: 0.0,
-                left: x_offset,
-            });
+            // 使用 Menu::view 渲染，并传入如何将 action 转成 Message
+            let menu_content = if let Some(menu_data) = self.get_active_menu_data() {
+                menu_data.view(Message::MenuAction)
+            } else {
+                column![].into()
+            };
+
+            let menu_popup = container(menu_content)
+                .padding(Padding {
+                    top: 35.0,
+                    right: 0.0,
+                    bottom: 0.0,
+                    left: x_offset,
+                });
 
             stack![main_layout, overlay, menu_popup].into()
         } else {
