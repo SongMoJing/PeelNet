@@ -3,6 +3,7 @@ members = [
     "crates/core_server",
     "crates/core_global",
     "crates/controller_core",
+    "crates/controller_gui",
     "crates/controller_web_ui",
     "crates/net_client",
     "crates/net_server"
